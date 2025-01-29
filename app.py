@@ -26,7 +26,7 @@ def poll_sqs_teams_loop():
             response = sqs_client.receive_message(
                 QueueUrl=P1_QUEUE_URL,WaitTimeSeconds=20)
 
-            messages = response['Messages']
+            messages = response.get("Messages", [])
 
             if not messages:
                 print("No messages available")
@@ -37,6 +37,7 @@ def poll_sqs_teams_loop():
                 body = eval(message['Body'])
 
                 print(f"Message Body: {body}")
+
 
 
                 teams_message = pymsteams.connectorcard(TEAMS_WEBHOOK_URL)
