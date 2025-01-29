@@ -31,7 +31,7 @@ class Request(BaseModel):
 request_counter = Counter(
     "priority_requests_total",
     "Total priority requests processed",
-    labelnames=["priority"]  # Changed from labels to labelnames
+    labelnames=["priority"]
 )
 
 
