@@ -24,25 +24,30 @@ def poll_sqs_teams_loop():
     while True:
         try:
             response = sqs_client.receive_message(
-                QueueUrl=P1_QUEUE_URL,MaxNumberOfMessages=1,WaitTimeSeconds=20)
+                QueueUrl=P1_QUEUE_URL,WaitTimeSeconds=20)
 
             messages = response['Messages']
+
+            if not messages:
+                print("No messages available")
+                continue
+
             for message in messages:
                 receipt_handle = message['ReceiptHandle']
-                body = message['Body']
+                body = eval(message['Body'])
 
                 print(f"Message Body: {body}")
 
 
                 teams_message = pymsteams.connectorcard(TEAMS_WEBHOOK_URL)
-                teams_message.title(f"priority: {body[1]}: {body[3]}")
-                teams_message.text("Test")
+                teams_message.title(f"Priority {body['priority']}: {body['title']}")
+                teams_message.text(body['description'])
                 teams_message.send()
 
+                sqs_client.delete_message(QueueUrl=P1_QUEUE_URL,ReceiptHandle=receipt_handle)
 
         except Exception as e:
             print(f"Error, cannot poll: {e}")
-        break
 
 
 
