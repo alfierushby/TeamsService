@@ -6,7 +6,8 @@ from flask import Flask, jsonify
 import boto3
 import pymsteams
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field, ValidationError
+from prometheus_flask_exporter import PrometheusMetrics, Counter
+from pydantic import BaseModel, Field
 
 load_dotenv()
 
@@ -18,11 +19,20 @@ ACCESS_SECRET = os.getenv('AWS_SECRET_ACCESS_KEY')
 
 app = Flask(__name__)
 
+# Initialize Prometheus Metrics once
+metrics = PrometheusMetrics(app)
+
 # Want the minimum length to be at least 1, otherwise "" can be sent which breaks certain APIs.
 class Request(BaseModel):
     title: str = Field(..., min_length=1)
     description: str = Field(..., min_length=1)
     priority: str = Field(..., min_length=1)
+
+request_counter = Counter(
+    "priority_requests_total",
+    "Total priority requests processed",
+    labelnames=["priority"]  # Changed from labels to labelnames
+)
 
 
 def poll_sqs_teams_loop():
@@ -52,6 +62,8 @@ def poll_sqs_teams_loop():
                 teams_message.title(f"Priority {handled_body['priority']}: {handled_body['title']}")
                 teams_message.text(handled_body['description'])
                 teams_message.send()
+
+                request_counter.labels(priority="High").inc()
 
                 sqs_client.delete_message(QueueUrl=P1_QUEUE_URL, ReceiptHandle=receipt_handle)
 
