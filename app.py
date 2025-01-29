@@ -1,3 +1,4 @@
+import json
 import os
 import threading
 
@@ -5,6 +6,7 @@ from flask import Flask, jsonify
 import boto3
 import pymsteams
 from dotenv import load_dotenv
+from pydantic import BaseModel, Field, ValidationError
 
 load_dotenv()
 
@@ -15,6 +17,12 @@ ACCESS_KEY = os.getenv('AWS_ACCESS_KEY_ID')
 ACCESS_SECRET = os.getenv('AWS_SECRET_ACCESS_KEY')
 
 app = Flask(__name__)
+
+# Want the minimum length to be at least 1, otherwise "" can be sent which breaks certain APIs.
+class Request(BaseModel):
+    title: str = Field(..., min_length=1)
+    description: str = Field(..., min_length=1)
+    priority: str = Field(..., min_length=1)
 
 
 def poll_sqs_teams_loop():
@@ -34,19 +42,22 @@ def poll_sqs_teams_loop():
 
             for message in messages:
                 receipt_handle = message['ReceiptHandle']
-                body = eval(message['Body'])
+                body = json.loads(message['Body'])
+
+                handled_body = Request(**body).model_dump()
 
                 print(f"Message Body: {body}")
 
                 teams_message = pymsteams.connectorcard(TEAMS_WEBHOOK_URL)
-                teams_message.title(f"Priority {body['priority']}: {body['title']}")
-                teams_message.text(body['description'])
+                teams_message.title(f"Priority {handled_body['priority']}: {handled_body['title']}")
+                teams_message.text(handled_body['description'])
                 teams_message.send()
 
                 sqs_client.delete_message(QueueUrl=P1_QUEUE_URL, ReceiptHandle=receipt_handle)
 
         except Exception as e:
             print(f"Error, cannot poll: {e}")
+
 
 @app.route('/health',methods=["GET"])
 def health_check():
