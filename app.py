@@ -24,7 +24,7 @@ def poll_sqs_teams_loop():
     while True:
         try:
             response = sqs_client.receive_message(
-                QueueUrl=P1_QUEUE_URL,WaitTimeSeconds=20)
+                QueueUrl=P1_QUEUE_URL, WaitTimeSeconds=20)
 
             messages = response.get("Messages", [])
 
@@ -38,24 +38,24 @@ def poll_sqs_teams_loop():
 
                 print(f"Message Body: {body}")
 
-
-
                 teams_message = pymsteams.connectorcard(TEAMS_WEBHOOK_URL)
                 teams_message.title(f"Priority {body['priority']}: {body['title']}")
                 teams_message.text(body['description'])
                 teams_message.send()
 
-                sqs_client.delete_message(QueueUrl=P1_QUEUE_URL,ReceiptHandle=receipt_handle)
+                sqs_client.delete_message(QueueUrl=P1_QUEUE_URL, ReceiptHandle=receipt_handle)
 
         except Exception as e:
             print(f"Error, cannot poll: {e}")
 
-
+@app.route('/health',methods=["GET"])
+def health_check():
+    """ Checks health, endpoint """
+    return jsonify({"status":"healthy"}),200
 
 if __name__ == '__main__':
     sqs_client = boto3.client('sqs', region_name=AWS_REGION, aws_access_key_id=ACCESS_KEY,
-    aws_secret_access_key=ACCESS_SECRET)
-    print("test")
-    sqs_thread = threading.Thread(target=poll_sqs_teams_loop,daemon=True)
+                              aws_secret_access_key=ACCESS_SECRET)
+    sqs_thread = threading.Thread(target=poll_sqs_teams_loop, daemon=True)
     sqs_thread.start()
     app.run()
