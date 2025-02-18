@@ -9,4 +9,4 @@ ENV P1_QUEUE_URL=""
 ENV AWS_REGION=""
 ENV AWS_ACCESS_KEY_ID=""
 ENV AWS_SECRET_ACCESS_KEY=""
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:create_app()"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "-c","gunicorn_config.py","app:create_app()"]

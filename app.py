@@ -1,6 +1,7 @@
 import json
 import os
 import threading
+import logging
 
 from flask import Flask, jsonify
 import boto3
@@ -9,6 +10,8 @@ from dotenv import load_dotenv
 from prometheus_flask_exporter import PrometheusMetrics, Counter
 from pydantic import BaseModel, Field
 
+stop_event = threading.Event()
+
 load_dotenv()
 
 AWS_REGION = os.getenv('AWS_REGION')
@@ -16,6 +19,8 @@ P1_QUEUE_URL = os.getenv('P1_QUEUE_URL')
 TEAMS_WEBHOOK_URL = os.getenv('TEAMS_WEBHOOK_URL')
 ACCESS_KEY = os.getenv('AWS_ACCESS_KEY_ID')
 ACCESS_SECRET = os.getenv('AWS_SECRET_ACCESS_KEY')
+
+gunicorn_logger = logging.getLogger("gunicorn.error")
 
 # Want the minimum length to be at least 1, otherwise "" can be sent which breaks certain APIs.
 class Request(BaseModel):
@@ -29,21 +34,20 @@ request_counter = Counter(
     labelnames=["priority"]
 )
 
-
 def poll_sqs_teams_loop(sqs_client):
     """
     Constantly checks SQS queue for messages and processes them to send to teams if possible
     """
-    while True:
+    while not stop_event.is_set():
         try:
             response = sqs_client.receive_message(
-                QueueUrl=P1_QUEUE_URL, WaitTimeSeconds=20)
+                QueueUrl=P1_QUEUE_URL, WaitTimeSeconds=2)
 
             messages = response.get("Messages", [])
 
             if not messages:
                 # Use logging instead!!
-                print("No messages available")
+                gunicorn_logger.info("No messages available")
                 continue
 
             for message in messages:
@@ -52,7 +56,7 @@ def poll_sqs_teams_loop(sqs_client):
 
                 handled_body = Request(**body).model_dump()
 
-                print(f"Message Body: {body}")
+                gunicorn_logger.info(f"Message Body: {body}")
 
                 teams_message = pymsteams.connectorcard(TEAMS_WEBHOOK_URL)
                 teams_message.title(f"Priority {handled_body['priority']}: {handled_body['title']}")
@@ -65,7 +69,7 @@ def poll_sqs_teams_loop(sqs_client):
 
         except Exception as e:
             # Use logging instead!!
-            print(f"Error, cannot poll: {e}")
+            gunicorn_logger.info(f"Error, cannot poll: {e}")
 
 def create_app():
     app = Flask(__name__)
