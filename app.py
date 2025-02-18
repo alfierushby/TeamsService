@@ -17,11 +17,6 @@ TEAMS_WEBHOOK_URL = os.getenv('TEAMS_WEBHOOK_URL')
 ACCESS_KEY = os.getenv('AWS_ACCESS_KEY_ID')
 ACCESS_SECRET = os.getenv('AWS_SECRET_ACCESS_KEY')
 
-app = Flask(__name__)
-
-# Initialize Prometheus Metrics once
-metrics = PrometheusMetrics(app)
-
 # Want the minimum length to be at least 1, otherwise "" can be sent which breaks certain APIs.
 class Request(BaseModel):
     title: str = Field(..., min_length=1)
@@ -35,7 +30,7 @@ request_counter = Counter(
 )
 
 
-def poll_sqs_teams_loop():
+def poll_sqs_teams_loop(sqs_client):
     """
     Constantly checks SQS queue for messages and processes them to send to teams if possible
     """
@@ -47,6 +42,7 @@ def poll_sqs_teams_loop():
             messages = response.get("Messages", [])
 
             if not messages:
+                # Use logging instead!!
                 print("No messages available")
                 continue
 
@@ -68,17 +64,26 @@ def poll_sqs_teams_loop():
                 sqs_client.delete_message(QueueUrl=P1_QUEUE_URL, ReceiptHandle=receipt_handle)
 
         except Exception as e:
+            # Use logging instead!!
             print(f"Error, cannot poll: {e}")
 
+def create_app():
+    app = Flask(__name__)
 
-@app.route('/health',methods=["GET"])
-def health_check():
-    """ Checks health, endpoint """
-    return jsonify({"status":"healthy"}),200
+    # Initialize Prometheus Metrics once
+    metrics = PrometheusMetrics(app)
 
-if __name__ == '__main__':
     sqs_client = boto3.client('sqs', region_name=AWS_REGION, aws_access_key_id=ACCESS_KEY,
                               aws_secret_access_key=ACCESS_SECRET)
-    sqs_thread = threading.Thread(target=poll_sqs_teams_loop, daemon=True)
+    sqs_thread = threading.Thread(target=poll_sqs_teams_loop, args=(sqs_client,), daemon=True)
     sqs_thread.start()
-    app.run()
+
+    @app.route('/health',methods=["GET"])
+    def health_check():
+        """ Checks health, endpoint """
+        return jsonify({"status":"healthy"}),200
+
+    return app
+
+if __name__ == '__main__':
+    create_app().run()
