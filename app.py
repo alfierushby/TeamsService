@@ -41,7 +41,7 @@ def poll_sqs_teams_loop(sqs_client):
     while not stop_event.is_set():
         try:
             response = sqs_client.receive_message(
-                QueueUrl=P1_QUEUE_URL, WaitTimeSeconds=2)
+                QueueUrl=P1_QUEUE_URL, WaitTimeSeconds=20)
 
             messages = response.get("Messages", [])
 
