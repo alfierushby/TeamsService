@@ -3,9 +3,8 @@ import os
 import boto3
 import pytest
 from unittest.mock import patch, MagicMock
-
-from ..configdata import TestConfig
-from ..app import create_app
+from config import TestConfig
+from app import create_app
 from moto import mock_aws
 
 @pytest.fixture
@@ -30,8 +29,6 @@ def app():
             app = create_app(config=config)
 
             yield app
-
-
 
 @pytest.fixture
 def client(app):
