@@ -1,5 +1,4 @@
 import os
-import os
 
 class BaseConfig:
     """Base configuration with shared settings."""

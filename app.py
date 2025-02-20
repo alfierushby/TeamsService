@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from prometheus_flask_exporter import PrometheusMetrics, Counter
 from pydantic import BaseModel, Field
 
-from config import BaseConfig
+from configdata import BaseConfig
 
 stop_event = threading.Event()
 

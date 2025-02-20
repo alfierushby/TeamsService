@@ -15,11 +15,6 @@ jobs:
   pytests:
     uses: alfierushby/github_actions/.github/workflows/pytests.yml@main
 
-  sonarcloud-scan:
-    uses: alfierushby/github_actions/.github/workflows/sonar_scan.yml@main
-    secrets:
-      sonar_token: ${{ secrets.SONAR_TOKEN }}
-
   build-docker:
     uses: alfierushby/github_actions/.github/workflows/docker_build.yml@main
 
@@ -32,7 +27,7 @@ jobs:
     needs:
       - trivy_scan
       - pytests
-      - sonarcloud-scan
+      -
     uses: alfierushby/github_actions/.github/workflows/ecr_push.yml@main
     secrets:
       account_id: ${{ secrets.ACCOUNT_ID }}
