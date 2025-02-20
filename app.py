@@ -3,6 +3,7 @@ import os
 import threading
 import logging
 
+from dependency_injector.wiring import inject, Provide
 from flask import Flask, jsonify
 import boto3
 import pymsteams
@@ -10,15 +11,11 @@ from dotenv import load_dotenv
 from prometheus_flask_exporter import PrometheusMetrics, Counter
 from pydantic import BaseModel, Field
 
+from containers import Container
+
 stop_event = threading.Event()
 
 load_dotenv()
-
-AWS_REGION = os.getenv('AWS_REGION')
-P1_QUEUE_URL = os.getenv('P1_QUEUE_URL')
-TEAMS_WEBHOOK_URL = os.getenv('TEAMS_WEBHOOK_URL')
-ACCESS_KEY = os.getenv('AWS_ACCESS_KEY_ID')
-ACCESS_SECRET = os.getenv('AWS_SECRET_ACCESS_KEY')
 
 gunicorn_logger = logging.getLogger("gunicorn.error")
 
@@ -34,20 +31,22 @@ request_counter = Counter(
     labelnames=["priority"]
 )
 
-def poll_sqs_teams_loop(sqs_client):
+
+def poll_sqs_teams_loop(container: Container):
     """
     Constantly checks SQS queue for messages and processes them to send to teams if possible
     """
+    config = container.config
     while not stop_event.is_set():
         try:
-            response = sqs_client.receive_message(
-                QueueUrl=P1_QUEUE_URL, WaitTimeSeconds=20)
+            response = container.sqs_client().receive_message(
+                QueueUrl=config.priority_queue(), WaitTimeSeconds=20)
 
             messages = response.get("Messages", [])
 
             if not messages:
                 # Use logging instead!!
-                gunicorn_logger.info("No messages available")
+                print("No messages available")
                 continue
 
             for message in messages:
@@ -56,30 +55,39 @@ def poll_sqs_teams_loop(sqs_client):
 
                 handled_body = Request(**body).model_dump()
 
-                gunicorn_logger.info(f"Message Body: {body}")
+                print(f"Message Body: {body}")
 
-                teams_message = pymsteams.connectorcard(TEAMS_WEBHOOK_URL)
+                teams_message = pymsteams.connectorcard(config.teams_web_hook())
                 teams_message.title(f"Priority {handled_body['priority']}: {handled_body['title']}")
                 teams_message.text(handled_body['description'])
                 teams_message.send()
 
                 request_counter.labels(priority="High").inc()
 
-                sqs_client.delete_message(QueueUrl=P1_QUEUE_URL, ReceiptHandle=receipt_handle)
+                container.sqs_client().delete_message(QueueUrl=config.priority_queue(), ReceiptHandle=receipt_handle)
 
         except Exception as e:
             # Use logging instead!!
-            gunicorn_logger.info(f"Error, cannot poll: {e}")
+            print(f"Error, cannot poll: {e}")
 
-def create_app():
+def create_app(container: Container = None):
     app = Flask(__name__)
 
     # Initialize Prometheus Metrics once
     metrics = PrometheusMetrics(app)
 
-    sqs_client = boto3.client('sqs', region_name=AWS_REGION, aws_access_key_id=ACCESS_KEY,
-                              aws_secret_access_key=ACCESS_SECRET)
-    sqs_thread = threading.Thread(target=poll_sqs_teams_loop, args=(sqs_client,), daemon=True)
+    # Initialize DI container if not provided
+    if container is None:
+        container = Container()
+        container.config.from_dict({
+            "aws_region": os.getenv("AWS_REGION"),
+            "aws_access_key_id": os.getenv("AWS_ACCESS_KEY_ID"),
+            "aws_secret_access_key": os.getenv("AWS_SECRET_ACCESS_KEY"),
+            "priority_queue": os.getenv("P1_QUEUE_URL"),
+            "teams_web_hook": os.getenv("TEAMS_WEBHOOK_URL")
+        })
+
+    sqs_thread = threading.Thread(target=poll_sqs_teams_loop,args=(container,), daemon=True)
     sqs_thread.start()
 
     @app.route('/health',methods=["GET"])
