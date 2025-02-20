@@ -5,7 +5,7 @@ import pytest
 from unittest.mock import patch, MagicMock
 
 from ..configdata import TestConfig
-from app import create_app
+from ..app import create_app
 from moto import mock_aws
 
 @pytest.fixture
