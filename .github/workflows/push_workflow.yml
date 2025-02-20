@@ -27,7 +27,6 @@ jobs:
     needs:
       - trivy_scan
       - pytests
-      -
     uses: alfierushby/github_actions/.github/workflows/ecr_push.yml@main
     secrets:
       account_id: ${{ secrets.ACCOUNT_ID }}
