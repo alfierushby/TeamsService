@@ -1,15 +1,16 @@
 import json
 import os
+import time
+from unittest.mock import patch
 
 import boto3
-from dependency_injector.wiring import Provide
-from containers import Container
+from moto import mock_aws
 
 
-def test_empty_string_description_post(priority_queue: str = Provide[Container.priority_queue]):
+def test_medium_priority_post(client):
     """Test a post with an empty string description
-    :param client: The client to interact with the app
-    """
+     :param client: The client to interact with the app
+     """
     # Simulate form submission
     # Get the correct queue URL from Flask's test config
 
@@ -21,8 +22,16 @@ def test_empty_string_description_post(priority_queue: str = Provide[Container.p
         "description": "Fix ASAP",
         "priority": "medium"
     }
+    queue_url = client.application.config.get("PRIORITY_QUEUE")
+    sqs.send_message(QueueUrl=queue_url, MessageBody=json.dumps(external_data))
 
-    sqs.send_message(QueueUrl=priority_queue, MessageBody=json.dumps(external_data))
-
-
-
+    # Wait for processing.
+    time.sleep(4)
+    # Should be empty
+    response = sqs.receive_message(
+        QueueUrl=queue_url,
+        MaxNumberOfMessages=10,  # Get up to 10 messages
+        WaitTimeSeconds=2,  # Short wait time
+        VisibilityTimeout=0  # Ensure messages are visible
+    )
+    assert "Messages" not in response

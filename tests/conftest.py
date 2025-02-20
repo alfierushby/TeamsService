@@ -3,14 +3,10 @@ import os
 import boto3
 import pytest
 from unittest.mock import patch, MagicMock
-from dotenv import load_dotenv
+
+from config import TestConfig
 from app import create_app
 from moto import mock_aws
-
-from containers import Container
-from tests import test_routes
-
-load_dotenv()
 
 @pytest.fixture
 def app():
@@ -28,20 +24,13 @@ def app():
             mock_instance = MockConnectorCard.return_value
             mock_instance.send.return_value = True  # Simulate a successful send
 
-            # Set up container for testing
-            container = Container()
-
-            # Override SQS client with mock version
-            container.sqs_client.override(sqs)
-
             # Override priority queues with test values
-            container.priority_queue = queue
+            config = TestConfig(queue_url=queue)
 
-            container.wire(modules=[test_routes])
-
-            app = create_app(container)
+            app = create_app(config=config)
 
             yield app
+
 
 
 @pytest.fixture
