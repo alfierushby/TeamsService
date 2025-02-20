@@ -4,7 +4,7 @@ import boto3
 import pytest
 from unittest.mock import patch, MagicMock
 
-from configdata import TestConfig
+from ..configdata import TestConfig
 from app import create_app
 from moto import mock_aws
 
