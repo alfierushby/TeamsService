@@ -39,13 +39,13 @@ def poll_sqs_teams_loop(sqs_client,config):
     while not stop_event.is_set():
         try:
             response = sqs_client.receive_message(
-                QueueUrl=config.PRIORITY_QUEUE, WaitTimeSeconds=20)
+                QueueUrl=config.PRIORITY_QUEUE, WaitTimeSeconds=2)
 
             messages = response.get("Messages", [])
 
             if not messages:
                 # Use logging instead!!
-                gunicorn_logger.info("No messages available")
+                print("No messages available")
                 continue
 
             for message in messages:
@@ -54,7 +54,7 @@ def poll_sqs_teams_loop(sqs_client,config):
 
                 handled_body = Request(**body).model_dump()
 
-                gunicorn_logger.info(f"Message Body: {body}")
+                print(f"Message Body: {body}")
 
                 teams_message = pymsteams.connectorcard(config.TEAMS_WEBHOOK_URL)
                 teams_message.title(f"Priority {handled_body['priority']}: {handled_body['title']}")
@@ -67,7 +67,7 @@ def poll_sqs_teams_loop(sqs_client,config):
 
         except Exception as e:
             # Use logging instead!!
-            gunicorn_logger.info(f"Error, cannot poll: {e}")
+            print(f"Error, cannot poll: {e}")
 
 
 def create_app(sqs_client=None, config=None):
