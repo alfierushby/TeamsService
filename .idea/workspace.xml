@@ -7,8 +7,7 @@
     <list default="true" id="37a43941-7815-4010-a35c-8029e4f5a952" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gunicorn_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/gunicorn_config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_routes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/conftest.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,30 +33,30 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python tests.Python tests for test_routes.test_medium_priority_post.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.Python tests in tests.executor&quot;: &quot;Run&quot;,
-    &quot;Python.teamsService2.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Winothy/Documents/TheSoftwareInstitute/Project1/queue1/teamsService&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python tests.Python tests for test_routes.test_medium_priority_post.executor": "Debug",
+    "Python tests.Python tests in tests.executor": "Debug",
+    "Python.teamsService2.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Users/Winothy/Documents/TheSoftwareInstitute/Project1/queue1/teamsService",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\Winothy\Documents\TheSoftwareInstitute\Project1\queue1\teamsService2\tests" />
       <recent name="C:\Users\Winothy\Documents\TheSoftwareInstitute\Project1\queue1\teamsService2" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.teamsService2">
+  <component name="RunManager" selected="Python tests.Python tests in tests">
     <configuration name="teamsService2" type="PythonConfigurationType" factoryName="Python">
       <module name="teamsService2" />
       <option name="ENV_FILES" value="" />
@@ -139,6 +138,7 @@
       <workItem from="1740062462584" duration="3753000" />
       <workItem from="1740139808720" duration="766000" />
       <workItem from="1740185371987" duration="28000" />
+      <workItem from="1741863453369" duration="2694000" />
     </task>
     <servers />
   </component>
@@ -146,6 +146,7 @@
     <option name="version" value="3" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/teamsService$.coverage" NAME=" Coverage Results" MODIFIED="1741867873368" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/teamsService2$teamsService2.coverage" NAME="teamsService2 Coverage Results" MODIFIED="1740060146113" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/teamsService2$.coverage" NAME=" Coverage Results" MODIFIED="1740061908902" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/teamsService$teamsService2.coverage" NAME="teamsService2 Coverage Results" MODIFIED="1740139937639" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
